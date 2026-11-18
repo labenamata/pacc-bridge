@@ -1,0 +1,45 @@
+{
+  "name": "pacc-bridge",
+  "version": "1.0.0",
+  "description": "Pi CLI extension that connects interactive Pi sessions to the Pi Agent Command Center (PACC) dashboard.",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pacc",
+    "pi-agent-command-center",
+    "monitoring"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ws": "^8.18.1"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "1.5.2",
+    "@types/node": "^22.13.10",
+    "@types/ws": "^8.5.14",
+    "typebox": "^1.4.6",
+    "typescript": "^5.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/labenamata/pacc-bridge.git"
+  },
+  "homepage": "https://github.com/labenamata/pacc-bridge",
+  "bugs": {
+    "url": "https://github.com/labenamata/pacc-bridge/issues"
+  },
+  "license": "MIT",
+  "author": "labenamata"
+}
