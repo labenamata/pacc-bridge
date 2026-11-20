@@ -70,7 +70,7 @@ Resolution priority: **config file (slash commands) → environment variable →
 - Agent identity is derived from the project folder, not the PID, so restarts and multiple `pi` processes in the same project collapse into one agent card.
 - The extension connects on `session_start` and closes its socket on `session_shutdown`; it does not start background resources from the extension factory.
 - Heartbeat every 10 seconds; automatic reconnect 3 seconds after a dropped socket.
-- When the server is unreachable, only one notice is printed per outage and retries are silent. The Pi footer shows `PACC menyambung...`, `PACC terhubung` or `PACC terputus`.
+- When the server is unreachable, the bridge prints nothing and keeps retrying every 3 seconds. The Pi footer shows `PACC menyambung...`, `PACC terhubung` or `PACC terputus`, and `/pacc-status` reports details. Set `PACC_VERBOSE=1` to log every WebSocket error.
 - Screenshots are captured from image tool results and from the `pacc_screenshot` tool registered by this extension.
 
 ## Requirements
