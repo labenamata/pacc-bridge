@@ -113,7 +113,6 @@ export default function paccExtension(pi: ExtensionAPI) {
   }
 
   const VERBOSE_LOGS = process.env.PACC_VERBOSE === "1" || process.env.PACC_DEBUG === "1";
-  let failureNoticeShown = false;
   let lastStatusLabel: string | null = null;
 
   function setBridgeStatus(state: "connected" | "connecting" | "disconnected"): void {
@@ -139,29 +138,20 @@ export default function paccExtension(pi: ExtensionAPI) {
   }
 
   /**
-   * Connection retries run every 3 seconds. Printing the same WebSocket error on
-   * each attempt floods the CLI, so show one notice per outage and keep the
-   * footer status updated instead. Set PACC_VERBOSE=1 for full error logs.
+   * Connection retries run every 3 seconds, so logging each failure floods the
+   * CLI. Stay silent by default: the footer status shows the connection state
+   * and `/pacc-status` reports details on demand. Set PACC_VERBOSE=1 to log
+   * every failure while debugging.
    */
   function reportConnectionFailure(detail: string): void {
     setBridgeStatus("disconnected");
 
     if (VERBOSE_LOGS) {
       console.error(`[PACC Extension] ${detail}`);
-      return;
     }
-
-    if (failureNoticeShown) return;
-    failureNoticeShown = true;
-    console.warn(
-      `[PACC Extension] Tidak dapat terhubung ke ${config.wsUrl}. ` +
-        "Retry otomatis setiap 3 detik; pesan error berulang disembunyikan. " +
-        "Gunakan /pacc-status atau set PACC_VERBOSE=1 untuk detail."
-    );
   }
 
   function markConnected(): void {
-    failureNoticeShown = false;
     setBridgeStatus("connected");
   }
 
