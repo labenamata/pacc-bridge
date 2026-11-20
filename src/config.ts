@@ -113,10 +113,13 @@ export function updateConfig(patch: Partial<BridgeConfig>): BridgeConfig {
  * Accepts a hostname, host:port, URL with a path, or a ws:// URL and returns a
  * normalized HTTP server URL plus the WebSocket endpoint PACC expects.
  *
- * Defaults:
- * - Missing scheme is treated as http://
- * - Missing port on http/ws defaults to 4317
- * - http(s) URLs get /ws appended to their path
+ * Rules:
+ * - The port is only used when written explicitly, except for a bare host with
+ *   no scheme, which falls back to the PACC default port 4317.
+ * - `https://pacc.example.com` stays `https://pacc.example.com` (implicit 443);
+ *   it never becomes `:4317`.
+ * - Missing scheme on a bare host is treated as http:// (with :4317).
+ * - http(s) URLs get /ws appended to their path.
  */
 export function normalizeServer(input: string): NormalizedServer {
   const raw = (input || "").trim();
@@ -145,7 +148,9 @@ export function normalizeServer(input: string): NormalizedServer {
 
   if (!url.hostname) throw new Error(`Hostname tidak ditemukan pada "${raw}".`);
 
-  if (!hasPort && (url.protocol === "http:" || url.protocol === "ws:")) {
+  // A bare host without scheme (for example `192.168.1.10`) is a shorthand for the
+  // default PACC endpoint. When the user writes a scheme or a port, keep exactly that.
+  if (!suppliedScheme && !hasPort) {
     url.port = "4317";
   }
 

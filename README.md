@@ -36,12 +36,17 @@ Run these from inside a Pi session:
 
 Addresses are normalized automatically:
 
+A port is used **only when you write it**. With an explicit scheme the address is kept as written, so `https://pacc.labenamata.my.id` never becomes `:4317`. A bare host is a shorthand for the default PACC endpoint (`http://<host>:4317`).
+
 | Input | Server | WebSocket |
 | --- | --- | --- |
-| `192.168.1.10` | `http://192.168.1.10:4317` | `ws://192.168.1.10:4317/ws` |
-| `192.168.1.10:8080` | `http://192.168.1.10:8080` | `ws://192.168.1.10:8080/ws` |
-| `https://pacc.example.com` | `https://pacc.example.com` | `wss://pacc.example.com/ws` |
+| `https://pacc.labenamata.my.id` | `https://pacc.labenamata.my.id` | `wss://pacc.labenamata.my.id/ws` |
+| `http://pacc.labenamata.my.id` | `http://pacc.labenamata.my.id` | `ws://pacc.labenamata.my.id/ws` |
 | `https://pacc.example.com/pacc` | `https://pacc.example.com/pacc` | `wss://pacc.example.com/pacc/ws` |
+| `https://pacc.example.com:8443` | `https://pacc.example.com:8443` | `wss://pacc.example.com:8443/ws` |
+| `http://192.168.1.10:8080` | `http://192.168.1.10:8080` | `ws://192.168.1.10:8080/ws` |
+| `192.168.1.10` | `http://192.168.1.10:4317` | `ws://192.168.1.10:4317/ws` |
+| `192.168.1.10:4317` | `http://192.168.1.10:4317` | `ws://192.168.1.10:4317/ws` |
 | `ws://192.168.1.10:4317` | `http://192.168.1.10:4317` | `ws://192.168.1.10:4317/ws` |
 
 ## Configuration
