@@ -563,7 +563,50 @@ export default function paccExtension(pi: ExtensionAPI) {
     });
   });
 
-  // Provider A: Capture images from tool results
+  // Helper to extract image file path from tool result text (e.g. MCP slim screenshot)
+  function extractImagePathFromText(text: string): string | null {
+    if (!text || typeof text !== "string") return null;
+    const trimmed = text.trim();
+
+    // Check if entire text or a substring looks like an image file path
+    // Match common image extensions: .png, .jpg, .jpeg, .webp, .gif
+    const imagePathRegex = /(?:[A-Za-z]:[/\\]|[./~]|[/])[^\s"'\n<>*?|]+\.(?:png|jpe?g|webp|gif)/i;
+    const match = trimmed.match(imagePathRegex);
+    if (!match) return null;
+
+    let candidate = match[0];
+    if (candidate.startsWith("~")) {
+      candidate = path.join(os.homedir(), candidate.slice(1));
+    }
+    const cwd = currentContext?.cwd || process.cwd();
+    const resolved = path.isAbsolute(candidate) ? candidate : path.resolve(cwd, candidate);
+
+    try {
+      if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+        return resolved;
+      }
+    } catch {
+      // Ignore filesystem access errors
+    }
+    return null;
+  }
+
+  function getMimeTypeFromExt(filePath: string): string {
+    const ext = path.extname(filePath).toLowerCase();
+    switch (ext) {
+      case ".jpg":
+      case ".jpeg":
+        return "image/jpeg";
+      case ".webp":
+        return "image/webp";
+      case ".gif":
+        return "image/gif";
+      default:
+        return "image/png";
+    }
+  }
+
+  // Provider A: Capture images from tool results (both inline base64 and MCP slim file paths)
   pi.on("tool_result", async (event) => {
     if (event.content && Array.isArray(event.content)) {
       for (const item of event.content) {
@@ -576,6 +619,29 @@ export default function paccExtension(pi: ExtensionAPI) {
             imageBase64: item.data,
             toolCallId: event.toolCallId
           });
+        } else if (item.type === "text" && item.text) {
+          // Detect MCP slim mode or tools returning file paths
+          const imagePath = extractImagePathFromText(item.text);
+          if (imagePath) {
+            try {
+              const buf = fs.readFileSync(imagePath);
+              // Max ~15MB limit before sending
+              if (buf.length <= 15 * 1024 * 1024) {
+                sendWS("screenshot:captured", {
+                  agentId,
+                  sessionId: currentSessionId,
+                  source: "agent_image",
+                  mimeType: getMimeTypeFromExt(imagePath),
+                  imageBase64: buf.toString("base64"),
+                  toolCallId: event.toolCallId
+                });
+              }
+            } catch (err: any) {
+              if (VERBOSE_LOGS) {
+                console.error("[PACC Extension] Gagal membaca gambar dari file tool result:", err?.message || err);
+              }
+            }
+          }
         }
       }
     }

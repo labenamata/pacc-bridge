@@ -1,6 +1,6 @@
 {
   "name": "pacc-bridge",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Pi CLI extension that connects interactive Pi sessions to the Pi Agent Command Center (PACC) dashboard.",
   "type": "module",
   "keywords": [
